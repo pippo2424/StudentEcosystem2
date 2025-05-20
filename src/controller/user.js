@@ -46,3 +46,37 @@ exports.signup = async(req, res) => {
 
 }
 
+exports.signin = async(req, res) =>{
+    try {
+        const {email,password} = req.body
+        console.log(email,password);
+        const user = await User.findOne({email:email});
+        console.log(user)
+        if (user){
+            
+            const isPassword = await user.authenticate(password);
+            console.log(isPassword);
+            if(isPassword && user.role==="user"){
+                const token = generateJwtToken(user._id, user.role)
+                return res.status(200).json({
+                    token,
+                    user:user
+                })
+                
+
+
+            }
+            else{
+                return res.status(400).json({message:"Wrong Password"});
+            }
+        }
+        else{
+            return res.status(400).json({message:"something went wrong"})
+        }
+
+    } catch (error) {
+        return res.status(400).json(error);
+        
+    }
+}
+
